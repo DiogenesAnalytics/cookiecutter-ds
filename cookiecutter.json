@@ -3,7 +3,7 @@
     "repo_name": "{{ cookiecutter.project_name.lower().replace(' ', '_') }}",
     "github_name": "DiogenesAnalytics",
     "repo_url": "https://github.com/{{ cookiecutter.github_name }}/{{ cookiecutter.repo_name }}.git",
-    "docker_image": "ghcr.io/diogenesanalytics/analytics-notebook:master",
+    "docker_image": "ghcr.io/diogenesanalytics/scipy-notebook:master",
     "container_name": "{{ cookiecutter.repo_name }}",
     "author_name": "Your name (or your organization/company/team)",
     "description": "A short description of the project.",
