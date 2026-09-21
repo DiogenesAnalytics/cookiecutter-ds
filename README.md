@@ -1,108 +1,110 @@
+[![tests](https://github.com/DiogenesAnalytics/cookiecutter-ds/actions/workflows/tests.yml/badge.svg)](https://github.com/DiogenesAnalytics/cookiecutter-ds/actions/workflows/tests.yml)
+[![docker](https://github.com/DiogenesAnalytics/cookiecutter-ds/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/DiogenesAnalytics/cookiecutter-ds/actions/workflows/docker-publish.yml)
+
 # Cookiecutter Data Science
 
-_A logical, reasonably standardized, but flexible project structure for doing and sharing data science work._
+*A logical, reasonably standardized, but flexible project structure for doing and sharing data science work.*
 
+This repository provides a Cookiecutter template for creating data science projects with a standardized project structure and a Docker-based Jupyter development environment.
 
-#### [Project homepage](http://drivendata.github.io/cookiecutter-data-science/)
+## Requirements
 
+* Python 3.9–3.12
+* [Cookiecutter](https://cookiecutter.readthedocs.io/)
+* Docker
 
-### Requirements to use the cookiecutter template:
------------
- - Python 2.7 or 3.5+
- - [Cookiecutter Python package](http://cookiecutter.readthedocs.org/en/latest/installation.html) >= 1.4.0: This can be installed with pip by or conda depending on how you manage your Python packages:
+Install Cookiecutter with pip:
 
-``` bash
-$ pip install cookiecutter
+```bash
+pip install cookiecutter
 ```
 
-or
+## Creating a New Project
 
-``` bash
-$ conda config --add channels conda-forge
-$ conda install cookiecutter
+Run Cookiecutter against this repository:
+
+```bash
+cookiecutter https://github.com/DiogenesAnalytics/cookiecutter-ds.git
 ```
 
+Cookiecutter will prompt for the project configuration, including the project name, author, GitHub account, description, and license.
 
-### To start a new project, run:
-------------
+The generated project uses the configured Docker image for its Jupyter development environment.
 
-    cookiecutter -c v1 https://github.com/drivendata/cookiecutter-data-science
+## Generated Project Structure
 
+The template currently generates the following project structure:
 
-[![asciicast](https://asciinema.org/a/244658.svg)](https://asciinema.org/a/244658)
-
-### New version of Cookiecutter Data Science
-------------
-Cookiecutter data science is moving to v2 soon, which will entail using
-the command `ccds ...` rather than `cookiecutter ...`. The cookiecutter command
-will continue to work, and this version of the template will still be available.
-To use the legacy template, you will need to explicitly use `-c v1` to select it.
-Please update any scripts/automation you have to append the `-c v1` option (as above),
-which is available now.
-
-
-### The resulting directory structure
-------------
-
-The directory structure of your new project looks like this: 
-
-```
+```text
 ├── LICENSE
-├── Makefile           <- Makefile with commands like `make data` or `make train`
-├── README.md          <- The top-level README for developers using this project.
+├── Makefile
+├── README.md
 ├── data
-│   ├── external       <- Data from third party sources.
-│   ├── interim        <- Intermediate data that has been transformed.
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- The original, immutable data dump.
-│
-├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-│
-├── models             <- Trained and serialized models, model predictions, or model summaries
-│
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`.
-│
-├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-│
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures        <- Generated graphics and figures to be used in reporting
-│
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-├── src                <- Source code for use in this project.
-│   ├── __init__.py    <- Makes src a Python module
-│   │
-│   ├── data           <- Scripts to download or generate data
-│   │   └── make_dataset.py
-│   │
-│   ├── features       <- Scripts to turn raw data into features for modeling
-│   │   └── build_features.py
-│   │
-│   ├── models         <- Scripts to train models and then use trained models to make
-│   │   │                 predictions
-│   │   ├── predict_model.py
-│   │   └── train_model.py
-│   │
-│   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-│       └── visualize.py
-│
-└── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+│   ├── external
+│   ├── interim
+│   ├── processed
+│   └── raw
+├── models
+├── notebooks
+│   └── template_report.ipynb
+├── references
+│   └── cited_report.bib
+├── reports
+│   ├── figures
+│   └── templates
+│       └── cited_report
+│           ├── conf.json
+│           └── index.tex.j2
+└── src
+    ├── data
+    │   ├── __init__.py
+    │   └── make_dataset.py
+    ├── features
+    │   ├── __init__.py
+    │   └── build_features.py
+    ├── models
+    │   ├── __init__.py
+    │   ├── predict_model.py
+    │   └── train_model.py
+    ├── visualization
+    │   ├── __init__.py
+    │   └── visualize.py
+    ├── __init__.py
+    ├── jupyter_report.py
+    └── web_images.py
 ```
 
-## Contributing
+The generated project is intentionally flexible. The template provides a useful starting structure without prescribing how individual analyses, models, or data-processing workflows must be implemented.
 
-We welcome contributions! [See the docs for guidelines](https://drivendata.github.io/cookiecutter-data-science/#contributing).
+## Development
 
-### Installing development requirements
-------------
+The template itself is developed and tested separately from the projects it generates.
 
-    pip install -r requirements.txt
+Install the development dependencies with Poetry:
 
-### Running the tests
-------------
+```bash
+poetry install --with test,lint
+```
 
-    py.test tests
+### Running Tests
+
+The test suite uses `pytest` and `pytest-cookies` to generate projects from the template and verify their structure and contents.
+
+```bash
+pytest
+```
+
+### Running the Checks
+
+The repository also provides Make targets for running the test and linting suite in the project's Docker testing environment.
+
+```bash
+make tests
+make check-all
+```
+
+See the `Makefile` for the complete set of available development commands.
+
+## License
+
+This project is distributed under the MIT License.
