@@ -1,0 +1,27 @@
+[project]
+name = "{{ cookiecutter.repo_name }}"
+version = "0.1.0"
+description = "{{ cookiecutter.description }}"
+authors = [
+    { name = "{{ cookiecutter.author_name }}" }
+]
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "nbreport @ git+https://github.com/DiogenesAnalytics/nbreport.git",
+]
+
+[tool.poetry.group.dev.dependencies]
+black = ">=21.10b0"
+deptry = "^0.23.0"
+flake8 = ">=4.0.1"
+isort = ">=5.10.1"
+mypy = ">=0.930"
+
+[tool.isort]
+profile = "black"
+force_single_line = true
+lines_after_imports = 2
+
+[build-system]
+requires = ["poetry-core>=2.0"]
+build-backend = "poetry.core.masonry.api"
