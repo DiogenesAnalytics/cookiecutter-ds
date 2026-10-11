@@ -1,8 +1,9 @@
-.PHONY: all jupyter pause address containers list-containers stop-containers \
-        restart-containers clear-nb clean
+.PHONY: all build-jupyter jupyter pause address containers list-containers \
+        stop-containers restart-containers clear-nb clean shell
 
 # Usage:
 # make                    # just alias to containers command
+# make build-jupyter      # pull or build the project Docker image
 # make jupyter            # startup Docker container running Jupyter server
 # make pause              # pause PSECS (to pause between commands)
 # make address            # get Docker container address/port
@@ -12,6 +13,7 @@
 # make restart-containers # restart all containers
 # make clear-nb           # simply clears Jupyter notebook output
 # make clean              # combines all clearing commands into one
+# make shell              # create an interactive shell
 
 ################################################################################
 # GLOBALS                                                                      #
@@ -27,12 +29,33 @@ CURRENTDIR := $(PWD)
 NOTEBOOKS  := $(shell find ${INTDR} -name "*.ipynb" -not -path "*/.ipynb_*/*")
 
 # docker-related variables
-JPTCTNR = jupyter.${DCTNR}
-DCKRIMG = {{ cookiecutter.docker_image }}
-DCKRRUN = docker run --rm -v ${CURRENTDIR}:/home/jovyan -it ${DCKRIMG}
+JPTCTNR := jupyter.${DCTNR}
+DCKROPT ?=
+DCKR_PULL ?= true
+DCKR_NOCACHE ?= false
+DCKRTTY := $(if $(filter true,$(NOTTY)),-i,-it)
+USE_VOL ?= true
+JPTRVOL := $(if $(filter true,$(USE_VOL)),-v ${CURRENTDIR}:/home/jovyan,)
+DCKRRUN := docker run --rm ${JPTRVOL} ${DCKRTTY} ${DCKROPT}
+
+# Project-specific Docker image
+DCKRIMG ?= {{ cookiecutter.docker_image }}
 
 # jupyter nbconvert vars
 NBCLER = jupyter nbconvert --clear-output --inplace
+
+# Define the Docker build command with optional --no-cache
+define DOCKER_BUILD
+	docker build -t $1 . \
+	  $(if $(filter true,$(DCKR_NOCACHE)),--no-cache)
+endef
+
+# Pull the published image or build it locally
+define DOCKER_PULL_OR_BUILD
+	$(if $(filter true,$(DCKR_PULL)), \
+	  docker pull $1 || (echo "Pull failed. Building Docker image for $1..." && \
+	  $(call DOCKER_BUILD,$1)), $(call DOCKER_BUILD,$1))
+endef
 
 ################################################################################
 # COMMANDS                                                                     #
@@ -41,8 +64,13 @@ NBCLER = jupyter nbconvert --clear-output --inplace
 # launch jupyter
 all: containers
 
+# Pull or build the project Docker image
+build-jupyter:
+	@ echo "Preparing project Docker image..."
+	@ $(call DOCKER_PULL_OR_BUILD,${DCKRIMG})
+
 # launch jupyter notebook development Docker image
-jupyter:
+jupyter: build-jupyter
 	@ echo "Launching Jupyter in Docker container -> ${JPTCTNR} ..."
 	@ if ! docker ps --format={{ "{{.Names}}" }} | grep -q "${JPTCTNR}"; then \
 	  docker run -d \
@@ -51,7 +79,7 @@ jupyter:
 	             -e PYTHONPATH=/home/jovyan/src \
 	             -e JUPYTER_ENABLE_LAB=yes \
 	             -p 8888 \
-	             -v "${CURRENTDIR}":/home/jovyan \
+	             ${JPTRVOL} \
 	             ${DCKROPT} \
 	             ${DCKRIMG} && \
 	  if ! grep -sq "${JPTCTNR}" "${CURRENTDIR}/.running_containers"; then \
@@ -115,9 +143,13 @@ stop-containers:
 restart-containers: stop-containers containers
 
 # remove output from executed notebooks
-clear-nb:
+clear-nb: build-jupyter
 	@ echo "Removing all output from Jupyter notebooks."
-	@ ${DCKRRUN} ${NBCLER} ${NOTEBOOKS}
+	@ ${DCKRRUN} ${DCKRIMG} ${NBCLER} ${NOTEBOOKS}
 
 # cleanup everything
 clean: clear-nb
+
+# create an interactive shell in the project container
+shell: build-jupyter
+	@ ${DCKRRUN} ${DCKRIMG} bash
